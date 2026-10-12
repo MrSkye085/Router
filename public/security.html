@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Security • Home Gateway</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+  <aside class="sidebar">
+    <div class="brand"><i class="fas fa-wifi"></i><div><span>Home Gateway</span><small>N300 Router v2.1</small></div></div>
+    <a href="/dashboard" class="nav-link"><i class="fas fa-gauge-high"></i><span>Dashboard</span></a>
+    <a href="/wifi" class="nav-link"><i class="fas fa-wifi"></i><span>Wi-Fi</span></a>
+    <a href="/devices" class="nav-link"><i class="fas fa-laptop"></i><span>Devices</span></a>
+    <a href="/security" class="nav-link active"><i class="fas fa-shield-halved"></i><span>Security</span></a>
+    <a href="/system" class="nav-link"><i class="fas fa-gear"></i><span>System</span></a>
+    <a href="#" id="logoutBtn" class="nav-link logout"><i class="fas fa-right-from-bracket"></i><span>Logout</span></a>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title"><i class="fas fa-shield-halved"></i> Security</h1>
+    <p class="page-subtitle">Firewall and parental controls</p>
+
+    <div class="card">
+      <h3><i class="fas fa-fire"></i> Firewall</h3>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Firewall Status</label>
+          <select id="firewall_enabled">
+            <option value="true">Enabled</option>
+            <option value="false">Disabled</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="saveFirewall"><i class="fas fa-floppy-disk"></i> Save</button>
+    </div>
+
+    <div class="card">
+      <h3><i class="fas fa-child"></i> Parental Controls</h3>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Parental Control</label>
+          <select id="parental_control">
+            <option value="false">Disabled</option>
+            <option value="true">Enabled</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" id="saveParental"><i class="fas fa-floppy-disk"></i> Save</button>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    async function load() {
+      const res = await fetch('/api/settings');
+      const { settings } = await res.json();
+      document.getElementById('firewall_enabled').value = settings.firewall_enabled || 'true';
+      document.getElementById('parental_control').value = settings.parental_control || 'false';
+    }
+    load();
+
+    document.getElementById('saveFirewall').addEventListener('click', async () => {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firewall_enabled: document.getElementById('firewall_enabled').value })
+      });
+      toast('Firewall updated');
+    });
+
+    document.getElementById('saveParental').addEventListener('click', async () => {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ parental_control: document.getElementById('parental_control').value })
+      });
+      toast('Parental controls updated');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await fetch('/logout', { method: 'POST' });
+      window.location.href = '/';
+    });
+
+    function toast(msg, error = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (error ? ' error' : '');
+      setTimeout(() => t.className = 'toast', 2500);
+    }
+  </script>
+</body>
+</html>

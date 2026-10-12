@@ -1,0 +1,26 @@
+cat > .gitignore << 'EOF'
+# Dependencies
+node_modules/
+
+# Environment variables (contains TURSO_AUTH_TOKEN — DO NOT COMMIT)
+.env
+.env.local
+
+# SQLite (local dev — Turso is the source of truth)
+*.db
+*.db-shm
+*.db-wal
+router.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Vercel
+.vercel
+EOF

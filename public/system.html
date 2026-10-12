@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>System • Home Gateway</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+  <aside class="sidebar">
+    <div class="brand"><i class="fas fa-wifi"></i><div><span>Home Gateway</span><small>N300 Router v2.1</small></div></div>
+    <a href="/dashboard" class="nav-link"><i class="fas fa-gauge-high"></i><span>Dashboard</span></a>
+    <a href="/wifi" class="nav-link"><i class="fas fa-wifi"></i><span>Wi-Fi</span></a>
+    <a href="/devices" class="nav-link"><i class="fas fa-laptop"></i><span>Devices</span></a>
+    <a href="/security" class="nav-link"><i class="fas fa-shield-halved"></i><span>Security</span></a>
+    <a href="/system" class="nav-link active"><i class="fas fa-gear"></i><span>System</span></a>
+    <a href="#" id="logoutBtn" class="nav-link logout"><i class="fas fa-right-from-bracket"></i><span>Logout</span></a>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title"><i class="fas fa-gear"></i> System</h1>
+    <p class="page-subtitle">Router firmware, backups, and tools</p>
+
+    <div class="card">
+      <h3><i class="fas fa-circle-info"></i> System Information</h3>
+      <div class="form-row">
+        <div class="form-field"><label>Router Name</label><input id="router_name" type="text"></div>
+        <div class="form-field"><label>Firmware</label><input id="firmware_version" type="text" readonly></div>
+      </div>
+      <button class="btn" id="saveSystem"><i class="fas fa-floppy-disk"></i> Save</button>
+    </div>
+
+    <div class="card">
+      <h3><i class="fas fa-power-off"></i> Maintenance</h3>
+      <div style="display:flex;gap:.7rem;flex-wrap:wrap;">
+        <button class="btn secondary" id="backupBtn"><i class="fas fa-download"></i> Backup Settings</button>
+        <button class="btn secondary" id="restoreBtn"><i class="fas fa-upload"></i> Restore Settings</button>
+        <button class="btn danger" id="rebootBtn"><i class="fas fa-rotate"></i> Reboot Router</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    async function load() {
+      const res = await fetch('/api/settings');
+      const { settings } = await res.json();
+      document.getElementById('router_name').value = settings.router_name || '';
+      document.getElementById('firmware_version').value = settings.firmware_version || '';
+    }
+    load();
+
+    document.getElementById('saveSystem').addEventListener('click', async () => {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ router_name: document.getElementById('router_name').value })
+      });
+      toast('System settings saved');
+    });
+
+    document.getElementById('backupBtn').addEventListener('click', async () => {
+      const res = await fetch('/api/settings');
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data.settings, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'router-backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('Backup downloaded');
+    });
+
+    document.getElementById('restoreBtn').addEventListener('click', () => {
+      toast('Restore feature (demo)', true);
+    });
+
+    document.getElementById('rebootBtn').addEventListener('click', async () => {
+      if (!confirm('Reboot the router now?')) return;
+      const res = await fetch('/api/reboot', { method: 'POST' });
+      const out = await res.json();
+      toast(out.message);
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await fetch('/logout', { method: 'POST' });
+      window.location.href = '/';
+    });
+
+    function toast(msg, error = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (error ? ' error' : '');
+      setTimeout(() => t.className = 'toast', 2500);
+    }
+  </script>
+</body>
+</html>

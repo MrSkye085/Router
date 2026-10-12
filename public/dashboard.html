@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard • Home Gateway</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="admin-body">
+  <aside class="sidebar">
+    <div class="brand">
+      <i class="fas fa-wifi"></i>
+      <div><span>Home Gateway</span><small>N300 Router v2.1</small></div>
+    </div>
+    <a href="/dashboard" class="nav-link active"><i class="fas fa-gauge-high"></i><span>Dashboard</span></a>
+    <a href="/wifi" class="nav-link"><i class="fas fa-wifi"></i><span>Wi-Fi</span></a>
+    <a href="/devices" class="nav-link"><i class="fas fa-laptop"></i><span>Devices</span></a>
+    <a href="/security" class="nav-link"><i class="fas fa-shield-halved"></i><span>Security</span></a>
+    <a href="/system" class="nav-link"><i class="fas fa-gear"></i><span>System</span></a>
+    <a href="#" id="logoutBtn" class="nav-link logout"><i class="fas fa-right-from-bracket"></i><span>Logout</span></a>
+  </aside>
+
+  <main class="main">
+    <h1 class="page-title"><i class="fas fa-gauge-high"></i> Dashboard</h1>
+    <p class="page-subtitle">Overview of your home network status</p>
+
+    <div class="card">
+      <h3><i class="fas fa-signal"></i> Connection Status</h3>
+      <div class="form-row">
+        <div class="form-field"><label>Internet</label><div>🟢 Connected · 245 Mbps</div></div>
+        <div class="form-field"><label>Uptime</label><div id="uptime">—</div></div>
+        <div class="form-field"><label>WAN IP</label><div>203.0.113.42</div></div>
+        <div class="form-field"><label>DNS</label><div>1.1.1.1, 8.8.8.8</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><i class="fas fa-chart-line"></i> System Resources</h3>
+      <div class="form-row">
+        <div class="form-field"><label>CPU</label><div>12%</div></div>
+        <div class="form-field"><label>Memory</label><div>38%</div></div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Uptime counter
+    let seconds = 0;
+    setInterval(() => {
+      seconds++;
+      const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      document.getElementById('uptime').textContent = `${h}:${m}:${s}`;
+    }, 1000);
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await fetch('/logout', { method: 'POST' });
+      window.location.href = '/';
+    });
+  </script>
+</body>
+</html>

